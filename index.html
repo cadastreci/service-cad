@@ -1,0 +1,1675 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        #map {
+            width: 1400px;
+            height: 600px;
+        }
+        </style>
+        <title>CARTE DE LA REGIONALISATION DES SERVICES DE CADASTRE DE CI</title>
+    </head>
+    <body>
+         <p class="flotte">
+         <img src="images/dgi.jpg" alt="DGI" width=10% height=10% />
+        </p>
+        <h4>
+       DIRECTION GENERALE DES IMPOTS - DIRECTION DU CADASTRE
+        </h4>
+        
+        <h2><strong> 
+        CARTE DE LA REGIONALISATION DES SERVICES DE CADASTRE DE CI
+        <strong></h2>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="data/LIMITESDESSOUSPREFECTURES_1.js"></script>
+        <script src="data/LIMITECOTEDIVOIRE_2.js"></script>
+        <script src="data/LIMITESCAD_3.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:16, minZoom:7
+        }).fitBounds([[2.8976685172684444,-13.028809767906958],[11.307336400249456,3.2451891728788222]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">Réalisée par : </a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">MEPT </a> &middot; <a href="https://qgis.org">Cel : 01 41 31 47 40 / DGI - Direction du Cadastre / Edition : Novembre 2024</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 7,
+            maxZoom: 16,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+        function pop_LIMITESDESSOUSPREFECTURES_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['fid'] !== null ? autolinker.link(feature.properties['fid'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Leng'] !== null ? autolinker.link(feature.properties['Shape_Leng'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Area'] !== null ? autolinker.link(feature.properties['Shape_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM3_FR'] !== null ? autolinker.link(feature.properties['ADM3_FR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM3_PCODE'] !== null ? autolinker.link(feature.properties['ADM3_PCODE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM3_REF'] !== null ? autolinker.link(feature.properties['ADM3_REF'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM3ALT1FR'] !== null ? autolinker.link(feature.properties['ADM3ALT1FR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM3ALT2FR'] !== null ? autolinker.link(feature.properties['ADM3ALT2FR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM2_FR'] !== null ? autolinker.link(feature.properties['ADM2_FR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM2_PCODE'] !== null ? autolinker.link(feature.properties['ADM2_PCODE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM1_FR'] !== null ? autolinker.link(feature.properties['ADM1_FR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM1_PCODE'] !== null ? autolinker.link(feature.properties['ADM1_PCODE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM0_FR'] !== null ? autolinker.link(feature.properties['ADM0_FR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ADM0_PCODE'] !== null ? autolinker.link(feature.properties['ADM0_PCODE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['date'] !== null ? autolinker.link(feature.properties['date'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['validOn'] !== null ? autolinker.link(feature.properties['validOn'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['validTo'] !== null ? autolinker.link(feature.properties['validTo'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_LIMITESDESSOUSPREFECTURES_1_0() {
+            return {
+                pane: 'pane_LIMITESDESSOUSPREFECTURES_1',
+                opacity: 1,
+                color: 'rgba(1,1,1,1.0)',
+                dashArray: '8.0,4.0',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 4.0, 
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_LIMITESDESSOUSPREFECTURES_1');
+        map.getPane('pane_LIMITESDESSOUSPREFECTURES_1').style.zIndex = 401;
+        map.getPane('pane_LIMITESDESSOUSPREFECTURES_1').style['mix-blend-mode'] = 'normal';
+        var layer_LIMITESDESSOUSPREFECTURES_1 = new L.geoJson(json_LIMITESDESSOUSPREFECTURES_1, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_LIMITESDESSOUSPREFECTURES_1',
+            layerName: 'layer_LIMITESDESSOUSPREFECTURES_1',
+            pane: 'pane_LIMITESDESSOUSPREFECTURES_1',
+            onEachFeature: pop_LIMITESDESSOUSPREFECTURES_1,
+            style: style_LIMITESDESSOUSPREFECTURES_1_0,
+        });
+        bounds_group.addLayer(layer_LIMITESDESSOUSPREFECTURES_1);
+        map.addLayer(layer_LIMITESDESSOUSPREFECTURES_1);
+        function pop_LIMITECOTEDIVOIRE_2(feature, layer) {
+            var popupContent = '<table>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_LIMITECOTEDIVOIRE_2_0() {
+            return {
+                pane: 'pane_LIMITECOTEDIVOIRE_2',
+                opacity: 1,
+                color: 'rgba(241,234,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 9.0, 
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_LIMITECOTEDIVOIRE_2');
+        map.getPane('pane_LIMITECOTEDIVOIRE_2').style.zIndex = 402;
+        map.getPane('pane_LIMITECOTEDIVOIRE_2').style['mix-blend-mode'] = 'normal';
+        var layer_LIMITECOTEDIVOIRE_2 = new L.geoJson(json_LIMITECOTEDIVOIRE_2, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_LIMITECOTEDIVOIRE_2',
+            layerName: 'layer_LIMITECOTEDIVOIRE_2',
+            pane: 'pane_LIMITECOTEDIVOIRE_2',
+            onEachFeature: pop_LIMITECOTEDIVOIRE_2,
+            style: style_LIMITECOTEDIVOIRE_2_0,
+        });
+        bounds_group.addLayer(layer_LIMITECOTEDIVOIRE_2);
+        map.addLayer(layer_LIMITECOTEDIVOIRE_2);
+        function pop_LIMITESCAD_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">SCAD</th>\
+                        <td>' + (feature.properties['SCAD'] !== null ? autolinker.link(feature.properties['SCAD'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CHEF DE SERVICE</th>\
+                        <td>' + (feature.properties['CHEF DE SERVICE'] !== null ? autolinker.link(feature.properties['CHEF DE SERVICE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CONTACTS</th>\
+                        <td>' + (feature.properties['CONTACTS'] !== null ? autolinker.link(feature.properties['CONTACTS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NBRE DE LOCALITES COUVERTES</th>\
+                        <td>' + (feature.properties['NBRE LOCALITES'] !== null ? autolinker.link(feature.properties['NBRE LOCALITES'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_LIMITESCAD_3_0(feature) {
+            switch(String(feature.properties['SCAD'])) {
+                case 'SCAD ABENGOUROU':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(149,209,46,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ABOBO 1':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(70,223,59,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ABOBO 2':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(233,21,63,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ABOISSO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(44,74,227,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ADJAME':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(8,99,255,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ADZOPE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(131,213,225,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD AGBOVILLE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,215,117,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ANYAMA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,12,145,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ATTECOUBE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,79,249,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BINGERVILLE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(225,255,8,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BONDOUKOU':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,252,137,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUAFLE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,141,186,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUAKE 1':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(183,164,17,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUAKE 2':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(129,226,154,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUNA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(115,90,229,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUNDIALI':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(60,190,70,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD COCODY II PLATEAUX':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(241,107,102,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DABOU':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(43,165,213,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DALOA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(198,222,90,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DANANE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,148,33,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DAOUKRO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(40,155,200,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DIMBOKRO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(24,207,134,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DIVO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(144,38,231,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DUEKOUE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,69,193,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD FERKE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(96,136,218,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD GAGNOA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(240,128,36,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD GRAND BASSAM':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(102,224,54,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD GUIGLO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(52,211,34,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD KATIOLA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,93,34,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD KORHOGO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,248,57,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD KOUMASSI':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(34,183,79,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD MAN':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(29,231,224,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD MARCORY':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(117,254,149,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ODIENNE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(172,76,132,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD PORT-BOUET':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(203,17,213,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD RIVIERA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,137,11,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD SAN PEDRO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(52,215,204,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD SASSANDRA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(248,248,105,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD SEGUELA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,193,101,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD SOUBRE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(148,109,64,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD TOUBA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(119,201,239,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD TREICHVILLE-VRIDI':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(249,178,111,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD YAMOUSSOUKRO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,252,0,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD YOPOUGON 1':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(1,255,242,0.7)',
+                interactive: true,
+            }
+                    break;
+                case 'SCAD YOPOUGON 2':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(195,35,35,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 8.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,251,15,0.7)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        function style_LIMITESCAD_3_1(feature) {
+            switch(String(feature.properties['SCAD'])) {
+                case 'SCAD ABENGOUROU':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ABOBO 1':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ABOBO 2':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ABOISSO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ADJAME':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ADZOPE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD AGBOVILLE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ANYAMA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ATTECOUBE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BINGERVILLE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BONDOUKOU':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUAFLE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUAKE 1':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUAKE 2':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUNA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD BOUNDIALI':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD COCODY II PLATEAUX':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DABOU':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DALOA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DANANE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DAOUKRO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DIMBOKRO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DIVO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD DUEKOUE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD FERKE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD GAGNOA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD GRAND BASSAM':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD GUIGLO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD KATIOLA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD KORHOGO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD KOUMASSI':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD MAN':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD MARCORY':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD ODIENNE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD PORT-BOUET':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD RIVIERA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD SAN PEDRO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD SASSANDRA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD SEGUELA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD SOUBRE':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD TOUBA':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD TREICHVILLE-VRIDI':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD YAMOUSSOUKRO':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD YOPOUGON 1':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'SCAD YOPOUGON 2':
+                    return {
+                pane: 'pane_LIMITESCAD_3',
+                opacity: 1,
+                color: 'rgba(255,245,8,0.7)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_LIMITESCAD_3');
+        map.getPane('pane_LIMITESCAD_3').style.zIndex = 403;
+        map.getPane('pane_LIMITESCAD_3').style['mix-blend-mode'] = 'normal';
+        var layer_LIMITESCAD_3 = new L.geoJson.multiStyle(json_LIMITESCAD_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_LIMITESCAD_3',
+            layerName: 'layer_LIMITESCAD_3',
+            pane: 'pane_LIMITESCAD_3',
+            onEachFeature: pop_LIMITESCAD_3,
+            styles: [style_LIMITESCAD_3_0,style_LIMITESCAD_3_1,]
+        });
+        bounds_group.addLayer(layer_LIMITESCAD_3);
+        map.addLayer(layer_LIMITESCAD_3);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var overlaysTree = [
+            {label: 'LIMITES DES SCAD (45)<br /><table><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADABENGOUROU0.png" /></td><td>SCAD ABENGOUROU</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADABOBO11.png" /></td><td>SCAD ABOBO 1</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADABOBO22.png" /></td><td>SCAD ABOBO 2</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADABOISSO3.png" /></td><td>SCAD ABOISSO</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADADJAME4.png" /></td><td>SCAD ADJAME</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADADZOPE5.png" /></td><td>SCAD ADZOPE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADAGBOVILLE6.png" /></td><td>SCAD AGBOVILLE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADANYAMA7.png" /></td><td>SCAD ANYAMA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADATTECOUBE8.png" /></td><td>SCAD ATTECOUBE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADBINGERVILLE9.png" /></td><td>SCAD BINGERVILLE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADBONDOUKOU10.png" /></td><td>SCAD BONDOUKOU</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADBOUAFLE11.png" /></td><td>SCAD BOUAFLE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADBOUAKE112.png" /></td><td>SCAD BOUAKE 1</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADBOUAKE213.png" /></td><td>SCAD BOUAKE 2</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADBOUNA14.png" /></td><td>SCAD BOUNA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADBOUNDIALI15.png" /></td><td>SCAD BOUNDIALI</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADCOCODYIIPLATEAUX16.png" /></td><td>SCAD COCODY II PLATEAUX</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADDABOU17.png" /></td><td>SCAD DABOU</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADDALOA18.png" /></td><td>SCAD DALOA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADDANANE19.png" /></td><td>SCAD DANANE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADDAOUKRO20.png" /></td><td>SCAD DAOUKRO</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADDIMBOKRO21.png" /></td><td>SCAD DIMBOKRO</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADDIVO22.png" /></td><td>SCAD DIVO</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADDUEKOUE23.png" /></td><td>SCAD DUEKOUE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADFERKE24.png" /></td><td>SCAD FERKE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADGAGNOA25.png" /></td><td>SCAD GAGNOA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADGRANDBASSAM26.png" /></td><td>SCAD GRAND BASSAM</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADGUIGLO27.png" /></td><td>SCAD GUIGLO</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADKATIOLA28.png" /></td><td>SCAD KATIOLA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADKORHOGO29.png" /></td><td>SCAD KORHOGO</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADKOUMASSI30.png" /></td><td>SCAD KOUMASSI</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADMAN31.png" /></td><td>SCAD MAN</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADMARCORY32.png" /></td><td>SCAD MARCORY</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADODIENNE33.png" /></td><td>SCAD ODIENNE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADPORTBOUET34.png" /></td><td>SCAD PORT-BOUET</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADRIVIERA35.png" /></td><td>SCAD RIVIERA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADSANPEDRO36.png" /></td><td>SCAD SAN PEDRO</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADSASSANDRA37.png" /></td><td>SCAD SASSANDRA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADSEGUELA38.png" /></td><td>SCAD SEGUELA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADSOUBRE39.png" /></td><td>SCAD SOUBRE</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADTOUBA40.png" /></td><td>SCAD TOUBA</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADTREICHVILLEVRIDI41.png" /></td><td>SCAD TREICHVILLE-VRIDI</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADYAMOUSSOUKRO42.png" /></td><td>SCAD YAMOUSSOUKRO</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADYOPOUGON143.png" /></td><td>SCAD YOPOUGON 1</td></tr><tr><td style="text-align: center;"><img src="legend/LIMITESCAD_3_SCADYOPOUGON244.png" /></td><td>SCAD YOPOUGON 2</td></tr></table>', layer: layer_LIMITESCAD_3},
+            {label: '<img src="legend/LIMITECOTEDIVOIRE_2.png" />  LIMITE COTE D\'IVOIRE', layer: layer_LIMITECOTEDIVOIRE_2},
+            {label: '<img src="legend/LIMITESDESSOUSPREFECTURES_1.png" />  LIMITES DES SOUS-PREFECTURES', layer: layer_LIMITESDESSOUSPREFECTURES_1},
+            {label: "OpenStreetMap", layer: layer_OSMStandard_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: false, 
+        });
+        lay.addTo(map);
+		document.addEventListener("DOMContentLoaded", function() {
+            // set new Layers List height which considers toggle icon
+            function newLayersListHeight() {
+                var layerScrollbarElement = document.querySelector('.leaflet-control-layers-scrollbar');
+                if (layerScrollbarElement) {
+                    var layersListElement = document.querySelector('.leaflet-control-layers-list');
+                    var originalHeight = layersListElement.style.height 
+                        || window.getComputedStyle(layersListElement).height;
+                    var newHeight = parseFloat(originalHeight) - 50;
+                    layersListElement.style.height = newHeight + 'px';
+                }
+            }
+            var isLayersListExpanded = true;
+            var controlLayersElement = document.querySelector('.leaflet-control-layers');
+            var toggleLayerControl = document.querySelector('.leaflet-control-layers-toggle');
+            // toggle Collapsed/Expanded and apply new Layers List height
+            toggleLayerControl.addEventListener('click', function() {
+                if (isLayersListExpanded) {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                } else {
+                    controlLayersElement.classList.add('leaflet-control-layers-expanded');
+                }
+                isLayersListExpanded = !isLayersListExpanded;
+                newLayersListHeight()
+            });	
+			// apply new Layers List height if toggle layerstree
+			if (controlLayersElement) {
+				controlLayersElement.addEventListener('click', function(event) {
+					var toggleLayerHeaderPointer = event.target.closest('.leaflet-layerstree-header-pointer span');
+					if (toggleLayerHeaderPointer) {
+						newLayersListHeight();
+					}
+				});
+			}
+            // Collapsed/Expanded at Start to apply new height
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            // Collapsed touch/small screen
+            var isSmallScreen = window.innerWidth < 650;
+            if (isSmallScreen) {
+                setTimeout(function() {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                    isLayersListExpanded = !isLayersListExpanded;
+                }, 500);
+            }  
+        });       
+        setBounds();
+        var i = 0;
+        layer_LIMITESDESSOUSPREFECTURES_1.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['ADM3_FR'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Arial Black\', sans-serif;">' + layer.feature.properties['ADM3_FR']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_LIMITESDESSOUSPREFECTURES_1'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_LIMITESCAD_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['SCAD'] !== null?String('<div style="color: #c32323; font-size: 13pt; font-weight: bold; font-family: \'Arial Black\', sans-serif;">' + layer.feature.properties['SCAD']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_LIMITESCAD_3'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        map.addControl(new L.Control.Search({
+            layer: layer_LIMITESDESSOUSPREFECTURES_1,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'ADM3_FR'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        resetLabels([layer_LIMITESDESSOUSPREFECTURES_1,layer_LIMITESCAD_3]);
+        map.on("zoomend", function(){
+            resetLabels([layer_LIMITESDESSOUSPREFECTURES_1,layer_LIMITESCAD_3]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_LIMITESDESSOUSPREFECTURES_1,layer_LIMITESCAD_3]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_LIMITESDESSOUSPREFECTURES_1,layer_LIMITESCAD_3]);
+        });
+        </script>
+    </body>
+</html>
